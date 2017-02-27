@@ -133,7 +133,7 @@ exports.authorizationFinish = function(req, res) {
 
   if(req.query.code && req.query.state) {
 
-    res.redirect("https://pitangui.amazon.com/api/skill/link/M1HU09WA2LOQ9P?code=" + req.query.code + "&scope=profile&state=" + req.query.state + "&redirect_uri=https://alexa-portal.herokuapp.com");
+    res.redirect("https://pitangui.amazon.com/api/skill/link/M1HU09WA2LOQ9P?code=" + req.query.code + "&scope=profile&state=" + req.query.state);
 
   } else {
     res.json(req.query);
