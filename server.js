@@ -1,4 +1,14 @@
-// Load required packages
+
+var https = require('https');
+var fs = require('fs');
+
+var options = {
+    key: fs.readFileSync('/etc/apache2/ssl/server.key'),
+    cert: fs.readFileSync('/etc/apache2/ssl/server.crt'),
+    requestCert: false,
+    rejectUnauthorized: false
+};
+
 var express = require('express');
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
@@ -14,7 +24,11 @@ var passport = require('passport');
 var authController = require('./controllers/auth');
 
 // Connect to the beerlocker MongoDB
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/beerlocker');
+// mongoose.Promise = global.Promise;
+// mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/beerlocker');
+
+// mongoose.Promise = global.Promise;
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/alexaportal');
 
 // Create our Express application
 var app = express();
@@ -66,6 +80,9 @@ router.route('/oauth2/authorize')
   .get(authController.isAuthenticated, oauth2Controller.authorization)
   .post(authController.isAuthenticated, oauth2Controller.decision);
 
+router.route('/oauth2/authorize/finish')
+  .get(authController.isAuthenticated, oauth2Controller.authorizationFinish);
+
 // Create endpoint handlers for oauth2 token
 router.route('/oauth2/token')
   .post(authController.isClientAuthenticated, oauth2Controller.token);
@@ -74,4 +91,8 @@ router.route('/oauth2/token')
 app.use('/api', router);
 
 // Start the server
-app.listen(process.env.PORT || 3000);
+// app.listen(process.env.PORT || 3000);
+
+var server = https.createServer(options, app).listen(process.env.PORT || 3000, function(){
+    console.log("server started at port 3000");
+});
