@@ -1,13 +1,13 @@
 
-var https = require('https');
-var fs = require('fs');
+// var https = require('https');
+// var fs = require('fs');
 
-var options = {
-    key: fs.readFileSync('/etc/apache2/ssl/server.key'),
-    cert: fs.readFileSync('/etc/apache2/ssl/server.crt'),
-    requestCert: false,
-    rejectUnauthorized: false
-};
+// var options = {
+//     key: fs.readFileSync('/etc/apache2/ssl/server.key'),
+//     cert: fs.readFileSync('/etc/apache2/ssl/server.crt'),
+//     requestCert: false,
+//     rejectUnauthorized: false
+// };
 
 var express = require('express');
 var mongoose = require('mongoose');
@@ -91,8 +91,8 @@ router.route('/oauth2/token')
 app.use('/api', router);
 
 // Start the server
-// app.listen(process.env.PORT || 3000);
+app.listen(process.env.PORT || 3000);
 
-var server = https.createServer(options, app).listen(process.env.PORT || 3000, function(){
-    console.log("server started at port 3000");
-});
+// var server = https.createServer(options, app).listen(process.env.PORT || 3000, function(){
+//     console.log("server started at port 3000");
+// });
