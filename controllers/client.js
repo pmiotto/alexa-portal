@@ -14,10 +14,11 @@ exports.postClients = function(req, res) {
 
   // Save the client and check for errors
   client.save(function(err) {
-    if (err)
+    if (err) {
       res.send(err);
-
-    res.json({ message: 'Client added to the locker!', data: client });
+    } else {
+      res.json({ message: 'Client added to the locker!', data: client });
+    }
   });
 };
 

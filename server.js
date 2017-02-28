@@ -1,13 +1,15 @@
 
-// var https = require('https');
-// var fs = require('fs');
+var https = require('https');
+var fs = require('fs');
 
-// var options = {
-//     key: fs.readFileSync('/etc/apache2/ssl/server.key'),
-//     cert: fs.readFileSync('/etc/apache2/ssl/server.crt'),
-//     requestCert: false,
-//     rejectUnauthorized: false
-// };
+if(!process.env.NODE_ENV) {
+  var options = {
+      key: fs.readFileSync('/etc/apache2/ssl/server.key'),
+      cert: fs.readFileSync('/etc/apache2/ssl/server.crt'),
+      requestCert: false,
+      rejectUnauthorized: false
+  };
+}
 
 var express = require('express');
 var mongoose = require('mongoose');
@@ -80,8 +82,8 @@ router.route('/oauth2/authorize')
   .get(authController.isAuthenticated, oauth2Controller.authorization)
   .post(authController.isAuthenticated, oauth2Controller.decision);
 
-router.route('/oauth2/authorize/finish')
-  .get(authController.isAuthenticated, oauth2Controller.authorizationFinish);
+// router.route('/oauth2/authorize/finish')
+//   .get(authController.isAuthenticated, oauth2Controller.authorizationFinish);
 
 // Create endpoint handlers for oauth2 token
 router.route('/oauth2/token')
@@ -91,8 +93,11 @@ router.route('/oauth2/token')
 app.use('/api', router);
 
 // Start the server
-app.listen(process.env.PORT || 3000);
+if(process.env.NODE_ENV) {
+  app.listen(process.env.PORT || 3000);
+} else {
+  var server = https.createServer(options, app).listen(process.env.PORT || 3000, function(){
+    console.log("server started at port 3000");
+  });
+}
 
-// var server = https.createServer(options, app).listen(process.env.PORT || 3000, function(){
-//     console.log("server started at port 3000");
-// });

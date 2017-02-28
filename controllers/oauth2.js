@@ -47,20 +47,25 @@ server.deserializeClient(function(id, callback) {
 // values, and will be exchanged for an access token.
 
 server.grant(oauth2orize.grant.code(function(client, redirectUri, user, ares, callback) {
-  // Create a new authorization code
-  var code = new Code({
-    value: uid(16),
-    clientId: client._id,
-    redirectUri: redirectUri,
-    userId: user._id
-  });
 
-  // Save the auth code and check for errors
-  code.save(function(err) {
-    if (err) { return callback(err); }
+  try {
+    // Create a new authorization code
+    var code = new Code({
+      value: uid(16),
+      clientId: client._id,
+      redirectUri: redirectUri,
+      userId: user._id
+    });
 
-    callback(null, code.value);
-  });
+    // Save the auth code and check for errors
+    code.save(function(err) {
+      if (err) { return callback(err); }
+
+      callback(null, code.value);
+    });
+  } catch(e) {
+    return callback(e);
+  }
 }));
 
 // Exchange authorization codes for access tokens.  The callback accepts the
@@ -70,31 +75,40 @@ server.grant(oauth2orize.grant.code(function(client, redirectUri, user, ares, ca
 // code.
 
 server.exchange(oauth2orize.exchange.code(function(client, code, redirectUri, callback) {
-  Code.findOne({ value: code }, function (err, authCode) {
-    if (err) { return callback(err); }
-    if (authCode === undefined) { return callback(null, false); }
-    if (client._id.toString() !== authCode.clientId) { return callback(null, false); }
-    if (redirectUri !== authCode.redirectUri) { return callback(null, false); }
 
-    // Delete auth code now that it has been used
-    authCode.remove(function (err) {
-      if(err) { return callback(err); }
+  try {
 
-      // Create a new access token
-      var token = new Token({
-        value: uid(256),
-        clientId: authCode.clientId,
-        userId: authCode.userId
-      });
+    Code.findOne({ value: code }, function (err, authCode) {
+      if (err) { return callback(err); }
 
-      // Save the access token and check for errors
-      token.save(function (err) {
-        if (err) { return callback(err); }
 
-        callback(null, token);
+      if (authCode === undefined || authCode === null) { return callback(null, false); }
+      if (!('clientId' in authCode)) { return callback(null, false); }
+      if (client._id.toString() !== authCode.clientId) { return callback(null, false); }
+      if (redirectUri !== authCode.redirectUri) { return callback(null, false); }
+
+      // Delete auth code now that it has been used
+      authCode.remove(function (err) {
+        if(err) { return callback(err); }
+
+        // Create a new access token
+        var token = new Token({
+          value: uid(256),
+          clientId: authCode.clientId,
+          userId: authCode.userId
+        });
+
+        // Save the access token and check for errors
+        token.save(function (err) {
+          if (err) { return callback(err); }
+
+          callback(null, token);
+        });
       });
     });
-  });
+  } catch(e) {
+    return callback(null, false);
+  }
 }));
 
 // user authorization endpoint
@@ -115,12 +129,15 @@ server.exchange(oauth2orize.exchange.code(function(client, code, redirectUri, ca
 
 exports.authorization = [
   server.authorization(function(clientId, redirectUri, callback) {
+    try {
+      Client.findOne({ id: clientId }, function (err, client) {
+        if (err) { return callback(err); }
 
-    Client.findOne({ id: clientId }, function (err, client) {
-      if (err) { return callback(err); }
-
-      return callback(null, client, redirectUri);
-    });
+        return callback(null, client, redirectUri);
+      });
+    } catch(e) {
+      return callback(e);
+    }
   }),
   function(req, res){
     res.render('dialog', { transactionID: req.oauth2.transactionID, user: req.user, client: req.oauth2.client });
@@ -128,18 +145,18 @@ exports.authorization = [
 ]
 
 
-exports.authorizationFinish = function(req, res) {
+// exports.authorizationFinish = function(req, res) {
   
 
-  if(req.query.code && req.query.state) {
+//   if(req.query.code && req.query.state) {
 
-    res.redirect("https://pitangui.amazon.com/api/skill/link/M1HU09WA2LOQ9P?code=" + req.query.code + "&scope=profile&state=" + req.query.state);
+//     res.redirect("https://pitangui.amazon.com/api/skill/link/M1HU09WA2LOQ9P?code=" + req.query.code + "&scope=profile&state=" + req.query.state);
 
-  } else {
-    res.json(req.query);
-  }
+//   } else {
+//     res.json(req.query);
+//   }
 
-};
+// };
 
 // user decision endpoint
 //
