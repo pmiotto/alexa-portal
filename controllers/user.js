@@ -3,8 +3,7 @@
 // Create endpoint /api/beers for GET
 exports.getAuthorize = function(req, res) {
 
-
-    res.redirect('https://pitangui.amazon.com/spa/skill/account-linking-status.html?vendorId=M1HU09WA2LOQ9P&state=' + req.query.state + '&token_type=Bearer&access_token=12345098765');
+    res.redirect('https://pitangui.amazon.com/spa/skill/account-linking-status.html?vendorId=M1HU09WA2LOQ9P#state=' + req.query.state + '&access_token=cjLzPS73YPrPagMfyUqTCki540AgfUBpoXAYu19ZaF7I3q3uKXnfNyZdF75bJJsgpvVUE2e9fSIofhoCpyTxMawZGEB2IAAkzEOuBR1150P7JAxqUvpEwDh6bok7xQy8KSYCbbjBNULFQKTeFc9P5kU1g0&token_type=Bearer');
 
     // res.json({
     //     state: req.query.state,
